@@ -32,7 +32,7 @@
                 });
                 locale.font_styles.custom = locale.font_styles.custom || [];
                 $.each(locale.font_styles.custom, function(style, displayName) {
-                    tmpl += "<li><a data-wysihtml5-command='customSpan' data-wysihtml5-command-value='" + style + "'>" + displayName + "</a></li>";
+                    tmpl += "<li><a data-wysihtml5-command='customSpan' data-wsyihtml5-command-value='" + style + "'>" + displayName + "</a></li>";
                 });
                 tmpl += "</ul>" +
                 "</li>";

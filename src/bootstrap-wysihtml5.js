@@ -97,6 +97,8 @@
                     "</div>" +
                     "<div class='modal-body'>" +
                       "<input value='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge'>" +
+                       "<table id='images-list' class='table-bordered table table-hover table-condensed'>"+
+                       "</table>"+
                     "</div>" +
                     "<div class='modal-footer'>" +
                       "<a href='#' class='btn' data-dismiss='modal'>" + locale.image.cancel + "</a>" +
@@ -142,6 +144,9 @@
     };
 
 
+
+
+
     var Wysihtml5 = function(el, options) {
         this.el = el;
         var toolbarOpts = options || defaultOptions;
@@ -185,15 +190,23 @@
         },
 
         createToolbar: function(el, options) {
+
             var self = this;
             var toolbar = $("<ul/>", {
                 'class' : "wysihtml5-toolbar",
                 'style': "display:none"
             });
+
+
             var culture = options.locale || defaultOptions.locale || "en";
             locale[culture].font_styles.custom = options.customStyles;
             locale[culture].font_styles.remove = options.removeStyles;
             for(var key in defaultOptions) {
+
+                if(key === 'imagesUrl') {
+                    this.getImages(options);
+                }
+
                 var value = false;
 
                 if(options[key] !== undefined) {
@@ -242,6 +255,24 @@
             this.el.before(toolbar);
 
             return toolbar;
+        },
+
+        getImages: function(options) {
+            console.log()
+            $.getJSON(options.imagesUrl, function(data) {
+                var items = [];
+                for (var key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        items.push("<tr class='image-url pointer' data-image-url='" + data[key].url + "'><td>" + data[key].name + "</td></tr>");
+                    }
+                }
+                $("#images-list").html(items.join())
+                $('.image-url').on('click', function() {
+                    var modal = $('.bootstrap-wysihtml5-insert-image-modal');
+                    var url = $(this).data('image-url')
+                    modal.find('input').val(url)
+                })
+            });
         },
 
         initHtml: function(toolbar) {
@@ -338,7 +369,7 @@
                 var activeButton = $(this).hasClass("wysihtml5-command-active");
 
                 if (!activeButton) {
-                    insertLinkModal.appendTo('body').modal('show');
+                    insertLinkModal.append('body').modal('show');
                     insertLinkModal.on('click.dismiss.modal', '[data-dismiss="modal"]', function(e) {
                         e.stopPropagation();
                     });
@@ -375,7 +406,8 @@
         init: function(options) {
             var that = this;
             return methods.shallowExtend.apply(that, [options]);
-        }
+        },
+
     };
 
     $.fn.wysihtml5 = function ( method ) {
@@ -399,6 +431,7 @@
         "html": false,
         "link": true,
         "image": true,
+        "imagesUrl": '',
         events: {},
         customStyles: {},
         removeStyles: [],

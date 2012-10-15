@@ -82,10 +82,12 @@
 <script src="lib/js/jquery-1.7.2.min.js"></script>
 <script src="lib/js/prettify.js"></script>
 <script src="lib/js/bootstrap.min.js"></script>
-<script src="src/bootstrap-wysihtml5.js"></script>
+<script src="dist/bootstrap-wysihtml5-0.0.2.js"></script>
 
 <script>
-	$('.textarea').wysihtml5();
+  $('.textarea').wysihtml5({
+    "imagesUrl": './images.json'
+  });
 </script>
 
 <script type="text/javascript" charset="utf-8">

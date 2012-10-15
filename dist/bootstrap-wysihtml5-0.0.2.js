@@ -146,7 +146,7 @@
 
             var self = this;
             var toolbar = $("<ul/>", {
-                'class' : "wysihtml5-toolbar well",
+                'class' : "wysihtml5-toolbar",
                 'style': "display:none"
             });
 
@@ -155,7 +155,7 @@
             for(var key in defaultOptions) {
 
                 if(key === 'imagesUrl') {
-                    this.getImages();
+                    this.getImages(options);
                 }
 
                 var value = false;
@@ -208,8 +208,8 @@
             return toolbar;
         },
 
-        getImages: function() {
-            $.getJSON(defaultOptions.imagesUrl, function(data) {
+        getImages: function(options) {
+            $.getJSON(options.imagesUrl, function(data) {
                 var items = [];
                 for (var key in data) {
                     if (data.hasOwnProperty(key)) {
@@ -378,7 +378,7 @@
         "html": false,
         "link": true,
         "image": true,
-        "imagesUrl": '/assets.json',
+        "imagesUrl": '',
         events: {},
         parserRules: {
             classes: {

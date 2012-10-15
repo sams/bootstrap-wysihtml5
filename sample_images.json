@@ -1,0 +1,16 @@
+[
+{
+name: "Pointy.gif",
+size: 1954,
+url: "https://vocalem.s3.amazonaws.com/uploads/asset/asset/1/Pointy.gif",
+delete_url: "/assets/1",
+delete_type: "DELETE"
+},
+{
+name: "Woof.gif",
+size: 1820,
+url: "https://vocalem.s3.amazonaws.com/uploads/asset/asset/2/Woof.gif",
+delete_url: "/assets/2",
+delete_type: "DELETE"
+}
+]

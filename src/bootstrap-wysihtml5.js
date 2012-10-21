@@ -209,8 +209,7 @@
         },
 
         getImages: function(options) {
-            console.log()
-            $.getJSON(options.imagesUrl, function(data) {
+            var test = $.getJSON(options.imagesUrl, function(data) {
                 var items = [];
                 for (var key in data) {
                     if (data.hasOwnProperty(key)) {

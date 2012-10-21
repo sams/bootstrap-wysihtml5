@@ -1,0 +1,16 @@
+[
+    {
+        "name": "HiRes.jpg",
+        "size": 1525252,
+        "url": "https://vocalem.s3.amazonaws.com/uploads/asset/asset/3/HiRes.jpg",
+        "delete_url": "/assets/3",
+        "delete_type": "DELETE"
+    },
+    {
+        "name": "PurpGuy.gif",
+        "size": 1839,
+        "url": "https://vocalem.s3.amazonaws.com/uploads/asset/asset/4/PurpGuy.gif",
+        "delete_url": "/assets/4",
+        "delete_type": "DELETE"
+    }
+]

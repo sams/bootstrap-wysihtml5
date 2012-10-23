@@ -1,22 +1,43 @@
 !function($, wysi) {
     "use strict";
+     (function(wysi) {
+          var undef;
+          wysi.commands.customSpan = {
+              exec: function(composer, command, sty) {
+                  return wysi.commands.formatInline.exec(composer, 'insertHTML', "span", sty, new RegExp(sty));
+              },
+              state: function(composer, command, sty) {
+                  return wysi.commands.formatInline.state(composer, 'insertHTML', "span", sty, new RegExp(sty));
+              },
 
+              value: function() {
+                  return undef;
+              }
+        };
+    })(wysi);
     var templates = function(key, locale) {
 
         var tpl = {
-            "font-styles":
-                "<li class='dropdown'>" +
-                  "<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>" +
-                  "<i class='icon-font'></i>&nbsp;<span class='current-font'>" + locale.font_styles.normal + "</span>&nbsp;<b class='caret'></b>" +
-                  "</a>" +
-                  "<ul class='dropdown-menu'>" +
-                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='div'>" + locale.font_styles.normal + "</a></li>" +
-                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h1'>" + locale.font_styles.h1 + "</a></li>" +
-                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h2'>" + locale.font_styles.h2 + "</a></li>" +
-                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h3'>" + locale.font_styles.h3 + "</a></li>" +
-                  "</ul>" +
-                "</li>",
-
+            "font-styles": (function() {
+                var tmpl = "<li class='dropdown'>" +
+                    "<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>" +
+                    "<i class='icon-font'></i>&nbsp;<span class='current-font'>" + locale.font_styles.normal + "</span>&nbsp;<b class='caret'></b>" +
+                    "</a>" +
+                    "<ul class='dropdown-menu'>";
+                var stylesToRemove = locale.font_styles.remove || [];
+                $.each(['normal','h1','h2','h3'], function(idx, key) {
+                     if (stylesToRemove.indexOf(key) < 0) {
+                       tmpl += "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='" + key + "'>" + locale.font_styles[key] + "</a></li>";
+                     }
+                });
+                locale.font_styles.custom = locale.font_styles.custom || [];
+                $.each(locale.font_styles.custom, function(style, displayName) {
+                    tmpl += "<li><a data-wysihtml5-command='customSpan' data-wysihtml5-command-value='" + style + "'>" + displayName + "</a></li>";
+                });
+                tmpl += "</ul>" +
+                "</li>";
+                return tmpl;
+            })(),
             "emphasis":
                 "<li>" +
                   "<div class='btn-group'>" +
@@ -59,16 +80,33 @@
                   "<div class='bootstrap-wysihtml5-insert-image-modal modal hide fade'>" +
                     "<div class='modal-header'>" +
                       "<a class='close' data-dismiss='modal'>&times;</a>" +
-                      "<h3>" + locale.image.insert + "</h3>" +
+                      "<ul class='nav nav-tabs'>"+
+                        "<li><a href='#images-insert' data-toggle='tab'>" + locale.image.insert + "</a></li>" +
+                        "<li><a href='#images-select' data-toggle='tab'>" + locale.image.select + "</a></li>" +
+                        "<li><a href='#images-upload' data-toggle='tab'>" + locale.image.upload + "</a></li>" +
+                      "</ul>" +
                     "</div>" +
                     "<div class='modal-body'>" +
-                      "<input value='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge'>" +
-                       "<table id='images-list' class='table-bordered table table-hover table-condensed'>"+
-                       "</table>"+
+                      "<div class='tab-content'>" +
+                          "<div class='tab-pane active' id='images-insert'>" +
+                            "<input value='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge'>" +
+                            "<a href='#' class='btn btn-primary' data-dismiss='modal'>" + locale.image.insert + "</a>" +
+                          "</div>" +
+                          "<div class='tab-pane' id='images-select'>" +
+                            "<table class='table table-condensed table-bordered table-hover pointer' id='images-list'>" +
+                            "</table>" +
+                          "</div>" +
+                          "<div class='tab-pane' id='images-upload'>" +
+                            "<form action='"+ defaultOptions.imagesUrl +"' method='post' id='new_image' enctype='multipart/form-data'>" +
+                              "<input type='file' name='asset[asset]' />" +
+                              "<iframe class='hidden' id='upload-iframe' name='upload-iframe' src=''>" +
+                              "</iframe>"+
+                            "</form>" +
+                          "</div>" +
+                      "</div>" +
                     "</div>" +
                     "<div class='modal-footer'>" +
                       "<a href='#' class='btn' data-dismiss='modal'>" + locale.image.cancel + "</a>" +
-                      "<a href='#' class='btn btn-primary' data-dismiss='modal'>" + locale.image.insert + "</a>" +
                     "</div>" +
                   "</div>" +
                   "<a class='btn' data-wysihtml5-command='insertImage' title='" + locale.image.insert + "'><i class='icon-picture'></i></a>" +
@@ -110,7 +148,13 @@
 
     var Wysihtml5 = function(el, options) {
         this.el = el;
-        this.toolbar = this.createToolbar(el, options || defaultOptions);
+        var toolbarOpts = options || defaultOptions
+        // add custom classes to the save class list */
+        for(var k in toolbarOpts.customStyles) {
+            toolbarOpts.parserRules.classes[k] = 1;
+        }
+        this.configuration = toolbarOpts;
+        this.toolbar = this.createToolbar(el, toolbarOpts);
         this.editor =  this.createEditor(options);
 
         window.editor = this.editor;
@@ -146,16 +190,20 @@
 
             var self = this;
             var toolbar = $("<ul/>", {
-                'class' : "wysihtml5-toolbar",
+                'class' : "wysihtml5-toolbar well",
                 'style': "display:none"
             });
 
 
             var culture = options.locale || defaultOptions.locale || "en";
+            
+            locale[culture].font_styles.custom = options.customStyles;
+            locale[culture].font_styles.remove = options.removeStyles;
+            
             for(var key in defaultOptions) {
 
                 if(key === 'imagesUrl') {
-                    this.getImages(options);
+                    this.getImages();
                 }
 
                 var value = false;
@@ -208,8 +256,35 @@
             return toolbar;
         },
 
-        getImages: function(options) {
-            $.getJSON(options.imagesUrl, function(data) {
+        initImageUpload: function() {
+            var self = this;
+            var form = $('#new_image');
+            
+            var checkComplete = function(){
+                var iframeContents = window.frames['upload-iframe'].document.body.innerHTML
+                if (iframeContents == "") {
+                    setTimeout(checkComplete, 2000);
+                } else {
+                    var response = $.parseJSON(iframeContents);
+                    var url = response[0].url
+                    console.log(url)
+                    self.editor.composer.commands.exec("insertImage", url);
+                    $('div.progress.upload').remove();
+                    $('.bootstrap-wysihtml5-insert-image-modal').modal('hide');
+                }
+            }
+
+            form.on('change', function() {
+                form.attr('target','upload-iframe');
+                form.submit();
+                form.after('<div class="progress progress-striped active upload"><div class="bar" style="width: 100%;"></div></div>');
+                checkComplete();
+            });
+        },
+
+        getImages: function() {
+            var self = this;
+            $.getJSON(defaultOptions.imagesUrl, function(data) {
                 var items = [];
                 for (var key in data) {
                     if (data.hasOwnProperty(key)) {
@@ -219,10 +294,12 @@
                 $("#images-list").html(items.join())
                 $('.image-url').on('click', function() {
                     var modal = $('.bootstrap-wysihtml5-insert-image-modal');
-                    var url = $(this).data('image-url')
-                    modal.find('input').val(url)
+                    var url = $(this).data('image-url');
+                    self.editor.composer.commands.exec("insertImage", url);
+                    $('.bootstrap-wysihtml5-insert-image-modal').modal('hide');
                 })
             });
+
         },
 
         initHtml: function(toolbar) {
@@ -242,6 +319,7 @@
             var insertImage = function() {
                 var url = urlInput.val();
                 urlInput.val(initialValue);
+                self.editor.currentView.element.focus();
                 self.editor.composer.commands.exec("insertImage", url);
             };
 
@@ -253,9 +331,12 @@
             });
 
             insertButton.click(insertImage);
-
+ 
             insertImageModal.on('shown', function() {
                 urlInput.focus();
+
+                //This inits a couple times, but I'm not sure where it would go. Everywhere else seems to fire before the modal is created.
+                self.initImageUpload();
             });
 
             insertImageModal.on('hide', function() {
@@ -288,6 +369,7 @@
             var insertLink = function() {
                 var url = urlInput.val();
                 urlInput.val(initialValue);
+                self.editor.currentView.element.focus();
                 self.editor.composer.commands.exec("createLink", {
                     href: url,
                     target: "_blank",
@@ -378,8 +460,10 @@
         "html": false,
         "link": true,
         "image": true,
-        "imagesUrl": '',
+        "imagesUrl": '/assets.json',
         events: {},
+        customStyles: {},
+        removeStyles: [],
         parserRules: {
             classes: {
                 // (path_to_project/lib/css/wysiwyg-color.css)
@@ -466,6 +550,8 @@
             },
             image: {
                 insert: "Insert image",
+                select: "Select from library",
+                upload: "Upload image",
                 cancel: "Cancel"
             },
             html: {

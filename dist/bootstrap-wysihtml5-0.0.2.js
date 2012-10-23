@@ -1,6 +1,5 @@
 !function($, wysi) {
     "use strict";
-
     var templates = function(key, locale) {
 
         var tpl = {
@@ -59,16 +58,33 @@
                   "<div class='bootstrap-wysihtml5-insert-image-modal modal hide fade'>" +
                     "<div class='modal-header'>" +
                       "<a class='close' data-dismiss='modal'>&times;</a>" +
-                      "<h3>" + locale.image.insert + "</h3>" +
+                      "<ul class='nav nav-tabs'>"+
+                        "<li><a href='#images-insert' data-toggle='tab'>" + locale.image.insert + "</a></li>" +
+                        "<li><a href='#images-select' data-toggle='tab'>" + locale.image.select + "</a></li>" +
+                        "<li><a href='#images-upload' data-toggle='tab'>" + locale.image.upload + "</a></li>" +
+                      "</ul>" +
                     "</div>" +
                     "<div class='modal-body'>" +
-                      "<input value='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge'>" +
-                       "<table id='images-list' class='table-bordered table table-hover table-condensed'>"+
-                       "</table>"+
+                      "<div class='tab-content'>" +
+                          "<div class='tab-pane active' id='images-insert'>" +
+                            "<input value='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge'>" +
+                            "<a href='#' class='btn btn-primary' data-dismiss='modal'>" + locale.image.insert + "</a>" +
+                          "</div>" +
+                          "<div class='tab-pane' id='images-select'>" +
+                            "<table class='table table-condensed table-bordered table-hover pointer' id='images-list'>" +
+                            "</table>" +
+                          "</div>" +
+                          "<div class='tab-pane' id='images-upload'>" +
+                            "<form action='"+ defaultOptions.imagesUrl +"' method='post' id='new_image' enctype='multipart/form-data'>" +
+                              "<input type='file' name='asset[asset]' />" +
+                              "<iframe class='hidden' id='upload-iframe' name='upload-iframe' src=''>" +
+                              "</iframe>"+
+                            "</form>" +
+                          "</div>" +
+                      "</div>" +
                     "</div>" +
                     "<div class='modal-footer'>" +
                       "<a href='#' class='btn' data-dismiss='modal'>" + locale.image.cancel + "</a>" +
-                      "<a href='#' class='btn btn-primary' data-dismiss='modal'>" + locale.image.insert + "</a>" +
                     "</div>" +
                   "</div>" +
                   "<a class='btn' data-wysihtml5-command='insertImage' title='" + locale.image.insert + "'><i class='icon-picture'></i></a>" +
@@ -146,16 +162,18 @@
 
             var self = this;
             var toolbar = $("<ul/>", {
-                'class' : "wysihtml5-toolbar",
+                'class' : "wysihtml5-toolbar well",
                 'style': "display:none"
             });
 
 
             var culture = options.locale || defaultOptions.locale || "en";
+            
+
             for(var key in defaultOptions) {
 
                 if(key === 'imagesUrl') {
-                    this.getImages(options);
+                    this.getImages();
                 }
 
                 var value = false;
@@ -208,8 +226,35 @@
             return toolbar;
         },
 
-        getImages: function(options) {
-            $.getJSON(options.imagesUrl, function(data) {
+        initImageUpload: function() {
+            var self = this;
+            var form = $('#new_image');
+            
+            var checkComplete = function(){
+                var iframeContents = window.frames['upload-iframe'].document.body.innerHTML
+                if (iframeContents == "") {
+                    setTimeout(checkComplete, 2000);
+                } else {
+                    var response = $.parseJSON(iframeContents);
+                    var url = response[0].url
+                    console.log(url)
+                    self.editor.composer.commands.exec("insertImage", url);
+                    $('div.progress.upload').remove();
+                    $('.bootstrap-wysihtml5-insert-image-modal').modal('hide');
+                }
+            }
+
+            form.on('change', function() {
+                form.attr('target','upload-iframe');
+                form.submit();
+                form.after('<div class="progress progress-striped active upload"><div class="bar" style="width: 100%;"></div></div>');
+                checkComplete();
+            });
+        },
+
+        getImages: function() {
+            var self = this;
+            $.getJSON(defaultOptions.imagesUrl, function(data) {
                 var items = [];
                 for (var key in data) {
                     if (data.hasOwnProperty(key)) {
@@ -219,10 +264,12 @@
                 $("#images-list").html(items.join())
                 $('.image-url').on('click', function() {
                     var modal = $('.bootstrap-wysihtml5-insert-image-modal');
-                    var url = $(this).data('image-url')
-                    modal.find('input').val(url)
+                    var url = $(this).data('image-url');
+                    self.editor.composer.commands.exec("insertImage", url);
+                    $('.bootstrap-wysihtml5-insert-image-modal').modal('hide');
                 })
             });
+
         },
 
         initHtml: function(toolbar) {
@@ -253,9 +300,12 @@
             });
 
             insertButton.click(insertImage);
-
+ 
             insertImageModal.on('shown', function() {
                 urlInput.focus();
+
+                //This inits a couple times, but I'm not sure where it would go. Everywhere else seems to fire before the modal is created.
+                self.initImageUpload();
             });
 
             insertImageModal.on('hide', function() {
@@ -378,7 +428,7 @@
         "html": false,
         "link": true,
         "image": true,
-        "imagesUrl": '',
+        "imagesUrl": '/assets.json',
         events: {},
         parserRules: {
             classes: {
@@ -466,6 +516,8 @@
             },
             image: {
                 insert: "Insert image",
+                select: "Select from library",
+                upload: "Upload image",
                 cancel: "Cancel"
             },
             html: {

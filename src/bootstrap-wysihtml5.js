@@ -32,7 +32,7 @@
                 });
                 locale.font_styles.custom = locale.font_styles.custom || [];
                 $.each(locale.font_styles.custom, function(style, displayName) {
-                    tmpl += "<li><a data-wysihtml5-command='customSpan' data-wysihtml5-command-value='" + style + "'>" + displayName + "</a></li>";
+                    tmpl += "<li><a data-wysihtml5-command='customSpan' data-wsyihtml5-command-value='" + style + "'>" + displayName + "</a></li>";
                 });
                 tmpl += "</ul>" +
                 "</li>";
@@ -405,7 +405,7 @@
                 var activeButton = $(this).hasClass("wysihtml5-command-active");
 
                 if (!activeButton) {
-                    insertLinkModal.append('body').modal('show');
+                    insertLinkModal.appendTo('body').modal('show');
                     insertLinkModal.on('click.dismiss.modal', '[data-dismiss="modal"]', function(e) {
                         e.stopPropagation();
                     });

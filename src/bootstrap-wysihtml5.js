@@ -1,11 +1,9 @@
 !function($, wysi) {
     "use strict";
 
-    var templates = function(key, locale) {
-
-        var tpl = {
-            "font-styles":
-                "<li class='dropdown'>" +
+    var tpl = {
+        "font-styles": function(locale) {
+            return "<li class='dropdown'>" +
                   "<a class='btn dropdown-toggle btn-wysihtml5' data-toggle='dropdown' href='#'>" +
                   "<i class='icon-font'></i>&nbsp;<span class='current-font'>" + locale.font_styles.normal + "</span>&nbsp;<b class='caret'></b>" +
                   "</a>" +
@@ -15,36 +13,42 @@
                     "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h2'>" + locale.font_styles.h2 + "</a></li>" +
                     "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h3'>" + locale.font_styles.h3 + "</a></li>" +
                   "</ul>" +
-                "</li>",
-            "multiple-font-styles":
-                "<li>" +
+                "</li>";
+        },
+
+        "multiple-font-styles": function(locale) {
+            return "<li>" +
                   "<div class='btn-group'>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h1' title=''>" + locale.multiple_font_styles.h1+ "</a>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h2' title=''>" + locale.multiple_font_styles.h2 + "</a>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h3' title=''>" + locale.multiple_font_styles.h3 + "</a>" +
                   "</div>" +
-                "</li>",
-            "emphasis":
-                "<li>" +
+                "</li>";
+        },
+
+        "emphasis": function(locale) {
+            return "<li>" +
                   "<div class='btn-group'>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-command='bold' title='CTRL+B'>" + locale.emphasis.bold + "</a>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-command='italic' title='CTRL+I'>" + locale.emphasis.italic + "</a>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-command='underline' title='CTRL+U'>" + locale.emphasis.underline + "</a>" +
                   "</div>" +
-                "</li>",
+                "</li>";
+        },
 
-            "lists":
-                "<li>" +
+        "lists": function(locale) {
+            return "<li>" +
                   "<div class='btn-group'>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-command='insertUnorderedList' title='" + locale.lists.unordered + "'><i class='icon-list'></i></a>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-command='insertOrderedList' title='" + locale.lists.ordered + "'><i class='icon-th-list'></i></a>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-command='Outdent' title='" + locale.lists.outdent + "'><i class='icon-indent-right'></i></a>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-command='Indent' title='" + locale.lists.indent + "'><i class='icon-indent-left'></i></a>" +
                   "</div>" +
-                "</li>",
+                "</li>";
+        },
 
-            "link":
-                "<li>" +
+        "link": function(locale) {
+            return "<li>" +
                   "<div class='bootstrap-wysihtml5-insert-link-modal modal hide fade'>" +
                     "<div class='modal-header'>" +
                       "<a class='close' data-dismiss='modal'>&times;</a>" +
@@ -59,10 +63,11 @@
                     "</div>" +
                   "</div>" +
                   "<a class='btn btn-wysihtml5' data-wysihtml5-command='createLink' title='" + locale.link.insert + "'><i class='icon-share'></i></a>" +
-                "</li>",
+                "</li>";
+        },
 
-            "image":
-                "<li>" +
+        "image": function(locale) {
+            return "<li>" +
                   "<div class='bootstrap-wysihtml5-insert-image-modal modal hide fade'>" +
                     "<div class='modal-header'>" +
                       "<a class='close' data-dismiss='modal'>&times;</a>" +
@@ -77,17 +82,19 @@
                     "</div>" +
                   "</div>" +
                   "<a class='btn btn-wysihtml5' data-wysihtml5-command='insertImage' title='" + locale.image.insert + "'><i class='icon-picture'></i></a>" +
-                "</li>",
+                "</li>";
+        },
 
-            "html":
-                "<li>" +
+        "html": function(locale) {
+            return "<li>" +
                   "<div class='btn-group'>" +
                     "<a class='btn btn-wysihtml5' data-wysihtml5-action='change_view' title='" + locale.html.edit + "'><i class='icon-pencil'></i></a>" +
                   "</div>" +
-                "</li>",
+                "</li>";
+        },
 
-            "color":
-                "<li class='dropdown'>" +
+        "color": function(locale) {
+            return "<li class='dropdown'>" +
                   "<a class='btn dropdown-toggle btn-wysihtml5' data-toggle='dropdown' href='#'>" +
                     "<span class='current-color'>" + locale.colours.black + "</span>&nbsp;<b class='caret'></b>" +
                   "</a>" +
@@ -104,15 +111,22 @@
                     "<li><div class='wysihtml5-colors' data-wysihtml5-command-value='blue'></div><a class='wysihtml5-colors-title' data-wysihtml5-command='foreColor' data-wysihtml5-command-value='blue'>" + locale.colours.blue + "</a></li>" +
                     "<li><div class='wysihtml5-colors' data-wysihtml5-command-value='orange'></div><a class='wysihtml5-colors-title' data-wysihtml5-command='foreColor' data-wysihtml5-command-value='orange'>" + locale.colours.orange + "</a></li>" +
                   "</ul>" +
-                "</li>"
-        };
-        return tpl[key];
+                "</li>";
+        }
+    };
+
+    var templates = function(key, locale) {
+        return tpl[key](locale);
     };
 
 
     var Wysihtml5 = function(el, options) {
         this.el = el;
-        this.toolbar = this.createToolbar(el, options || defaultOptions);
+        var toolbarOpts = options || defaultOptions;
+        for(var t in toolbarOpts.customTemplates) {
+          tpl[t] = toolbarOpts.customTemplates[t];
+        }
+        this.toolbar = this.createToolbar(el, toolbarOpts);
         this.editor =  this.createEditor(options);
 
         window.editor = this.editor;

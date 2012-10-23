@@ -1,3 +1,7 @@
+div.modal-body input.bootstrap-wysihtml5-insert-image-url {
+	margin-bottom: 0;
+}
+
 ul.wysihtml5-toolbar {
 	margin: 0;
 	padding: 0;

@@ -83,9 +83,19 @@
                       "<h3>" + locale.image.insert + "</h3>" +
                     "</div>" +
                     "<div class='modal-body'>" +
-                      "<input value='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge'>" +
-                       "<table id='images-list' class='table-bordered table table-hover table-condensed'>"+
+                      "<div class='input-append'><input value='' placeholder='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge span6' type='url'><span class='add-on'><a href='#' class='bootstrap-wysihtml5-modal-toggle' data-toggle='imageList'><i class='icon-black icon-th-list'></i></a><a href='#' class=' bootstrap-wysihtml5-modal-toggle' data-toggle='imageUpload'><i class='icon-black icon-upload'></i></a><a href='#' class='active bootstrap-wysihtml5-modal-toggle' data-toggle='imageOptions'><i class='icon-black icon-tasks'></i></a></span></div>" +
+                      "<div class='imageList bootstrap-wysihtml5-imagePanel hide'>" +
+                       "<table class='table-bordered table table-hover table-condensed'>"+
                        "</table>"+
+                      "</div>" +
+                      "<div class='imageUpload bootstrap-wysihtml5-imagePanel hide'>" +
+                      "</div>" +
+                      "<div class='imageOptions bootstrap-wysihtml5-imagePanel'>" +
+                      "<div class='control-row'><input placeholder='class' value='' class='bootstrap-wysihtml5-insert-image-class input-mini span6'></div>" +
+                      "<div class='control-row'><input placeholder='width' value='' class='bootstrap-wysihtml5-insert-image-width input-mini span2'> x " +
+                      "<input placeholder='height' value='' class='bootstrap-wysihtml5-insert-image-height input-mini span2'>" +
+                      "<input placeholder='alt' value='' class='bootstrap-wysihtml5-insert-image-alt input-mini span2'></div>" +
+                      "</div>" +
                     "</div>" +
                     "<div class='modal-footer'>" +
                       "<a href='#' class='btn' data-dismiss='modal'>" + locale.image.cancel + "</a>" +
@@ -239,17 +249,35 @@
 
         getImages: function(options) {
             var test = $.getJSON(options.imagesUrl, function(data) {
-                var items = [];
+                var items = [], widthHeight = '', thumb = '';
                 for (var key in data) {
                     if (data.hasOwnProperty(key)) {
-                        items.push("<tr class='image-url pointer' data-image-url='" + data[key].url + "'><td>" + data[key].name + "</td></tr>");
+                        thumb = data[key].thumb_url ? '<im src="'+data[key].thumb_url+'">' : '';
+                        widthHeight = (data[key].widthHeight && parseInt(data[key].widthHeight.length) > 0) ? data[key].widthHeight.join(',') : '';
+                        items.push("<tr class='image-url pointer' data-image-url='" + data[key].url + "' data-image-dimensions='" + widthHeight + "'><td>" + thumb + " " + data[key].name + "</td></tr>");
                     }
                 }
-                $("#images-list").html(items.join())
+                $(".imageList table").html(items.join())
                 $('.image-url').on('click', function() {
-                    var modal = $('.bootstrap-wysihtml5-insert-image-modal');
+                    var modal = $('.bootstrap-wysihtml5-insert-image-modal'), dim = [];
                     var url = $(this).data('image-url')
-                    modal.find('input').val(url)
+                    
+                    modal.find('input.bootstrap-wysihtml5-insert-image-url').val(url)
+                    
+                    if ($(this).data('image-dimensions') !== '') {
+                        dim = $(this).data('image-dimensions').split(',')
+                        if (dim.length > 0) {
+                            modal.find('input.bootstrap-wysihtml5-insert-image-width').val(dim[0])
+                        } else {
+                            modal.find('input.bootstrap-wysihtml5-insert-image-width').val()
+                        }
+                        
+                        if (dim.length > 1) {
+                            modal.find('input.bootstrap-wysihtml5-insert-image-height').val(dim[1])
+                        } else {
+                            modal.find('input.bootstrap-wysihtml5-insert-image-height').val()
+                        }
+                    }
                 })
             });
         },
@@ -265,14 +293,35 @@
             var self = this;
             var insertImageModal = toolbar.find('.bootstrap-wysihtml5-insert-image-modal');
             var urlInput = insertImageModal.find('.bootstrap-wysihtml5-insert-image-url');
+            var widthInput = insertImageModal.find('.bootstrap-wysihtml5-insert-image-width');
+            var heightInput = insertImageModal.find('.bootstrap-wysihtml5-insert-image-height');
+            var classInput = insertImageModal.find('.bootstrap-wysihtml5-insert-image-class');
+            var imagePanels = insertImageModal.find('.bootstrap-wysihtml5-imagePanel');
+            var panelToggles = insertImageModal.find('.bootstrap-wysihtml5-modal-toggle');
             var insertButton = insertImageModal.find('a.btn-primary');
             var initialValue = urlInput.val();
 
             var insertImage = function() {
-                var url = urlInput.val();
+                var url = urlInput.val(), width = widthInput.val(), height = heightInput.val(), classStr = classInput.val();
                 urlInput.val(initialValue);
+                var httpHost = window.location.protocol + "//" + window.location.host
+                if (url[0] == '/') {
+                    url = httpHost + url
+                    console.log(url);
+                } else {
+                    console.log('url is not absolute');
+                    console.log(url[0]);
+                }
                 self.editor.currentView.element.focus();
-                self.editor.composer.commands.exec("insertImage", url);
+                self.editor.composer.commands.exec("insertImage", { 'src': url, 'width': width, 'height': height });
+            };
+
+            var panelToggle = function() {
+                var target = $(this).data('toggle');
+                imagePanels.addClass('hide');
+                panelToggles.removeClass('active');
+                $(this).addClass('active');
+                $('.'+target).removeClass('hide');
             };
 
             urlInput.keypress(function(e) {
@@ -283,6 +332,10 @@
             });
 
             insertButton.click(insertImage);
+
+            panelToggles.click(panelToggle);
+            imagePanels.addClass('hide');
+            imagePanels.find('.'+panelToggles.find('.active').data('toggle')).removeClass('hide');;
 
             insertImageModal.on('shown', function() {
                 urlInput.focus();
@@ -317,6 +370,10 @@
 
             var insertLink = function() {
                 var url = urlInput.val();
+                var httpHost = window.location.protocol + "://" + window.location.host
+                if (url[0] == '/') {
+                    url = httpHost + url
+                }
                 urlInput.val(initialValue);
                 self.editor.currentView.element.focus();
                 self.editor.composer.commands.exec("createLink", {

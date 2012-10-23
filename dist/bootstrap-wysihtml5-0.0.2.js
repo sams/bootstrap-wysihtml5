@@ -196,7 +196,7 @@
 
 
             var culture = options.locale || defaultOptions.locale || "en";
-            
+
             locale[culture].font_styles.custom = options.customStyles;
             locale[culture].font_styles.remove = options.removeStyles;
             

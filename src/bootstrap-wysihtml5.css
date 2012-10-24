@@ -1,4 +1,4 @@
-div.modal-body input.bootstrap-wysihtml5-insert-image-url {
+div.bootstrap-wysihtml5-insert-image-modal input.bootstrap-wysihtml5-insert-image-url {
 	margin-bottom: 0;
 }
 
@@ -18,7 +18,7 @@ ul.wysihtml5-toolbar > li {
 	float: left;
 	display: list-item;
 	list-style: none;
-	margin: 0 5px 10px 0;
+	margin: 3px 5px 3px 0;
 }
 
 ul.wysihtml5-toolbar a[data-wysihtml5-command=bold] {

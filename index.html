@@ -90,8 +90,18 @@
 
 <script>
   $('.textarea').wysihtml5({
-	imagesUrl: 'images.json',
-	//customStyles : { my_style: 'My Style' },
+	"imagesUrl": 'images.json',
+	"uploadUrl" : 'uploadTest.php',
+	"uploadInit": function () {
+		var uploadFrm = 
+                            "<form action='uploadTest.php' method='post' id='new_image' enctype='multipart/form-data'>" +
+                              "<input type='file' name='asset[asset]' />" +
+                              "<iframe class='hidden' id='upload-iframe' name='upload-iframe' src=''>" +
+                              "</iframe>"+
+                            "</form>";
+		$('#images-upload').html(uploadFrm);
+	},
+	"customStyles": { my_style: 'My Style' },
 	"font-styles": true,
 	"emphasis": true,
 	"lists": true,
@@ -99,9 +109,9 @@
 	"link": true,
 	"image": true,
 	"color": true,
-	events: {},
-	parserRules: {
-		classes: {
+	"events": {},
+	"parserRules": {
+		"classes": {
 		  // (path_to_project/lib/css/wysiwyg-color.css)
 		  "wysiwyg-color-silver" : 1,
 		  "wysiwyg-color-gray" : 1,

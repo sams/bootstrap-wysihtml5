@@ -89,85 +89,33 @@
 <script src="src/bootstrap-wysihtml5.js"></script>
 
 <script>
-  $('.textarea').wysihtml5({
-	"imagesUrl": 'sample_images.json',
-	"uploadUrl" : 'uploadTest.php',
-	"uploadInit": function () {
-		var uploadFrm = 
-                            "<form action='uploadTest.php' method='post' id='new_image' enctype='multipart/form-data'>" +
-                              "<input type='file' name='asset[asset]' />" +
-                              "<iframe class='hidden' id='upload-iframe' name='upload-iframe' src=''>" +
-                              "</iframe>"+
-                            "</form>";
-		$('#images-upload').html(uploadFrm);
-	},
-	"customStyles": { my_style: 'My Style' },
-	"font-styles": true,
-	"emphasis": true,
-	"lists": true,
-	"html": true,
-	"link": true,
-	"image": true,
-	"color": true,
-	"events": {},
-	"parserRules": {
-		"classes": {
-		  // (path_to_project/lib/css/wysiwyg-color.css)
-		  "wysiwyg-color-silver" : 1,
-		  "wysiwyg-color-gray" : 1,
-		  "wysiwyg-color-white" : 1,
-		  "wysiwyg-color-maroon" : 1,
-		  "wysiwyg-color-red" : 1,
-		  "wysiwyg-color-purple" : 1,
-		  "wysiwyg-color-fuchsia" : 1,
-		  "wysiwyg-color-green" : 1,
-		  "wysiwyg-color-lime" : 1,
-		  "wysiwyg-color-olive" : 1,
-		  "wysiwyg-color-yellow" : 1,
-		  "wysiwyg-color-navy" : 1,
-		  "wysiwyg-color-blue" : 1,
-		  "wysiwyg-color-teal" : 1,
-		  "wysiwyg-color-aqua" : 1,
-		  "wysiwyg-color-orange" : 1,
-		},
-		tags: {
-			"b":  {},
-			"i":  {},
-			"br": {},
-			"p": {},
-			"ol": {},
-			"ul": {},
-			"li": {},
-			"h1": {},
-			"h2": {},
-			"h3": {},
-			"h4": {},
-			"h5": {},
-			"h6": {},
-			"em": {},
-			"strong": {},
-			"u": 1,
-			"img": {
-				"check_attributes": {
-					"width": "numbers",
-					"alt": "alt",
-					"src": "url",
-					"height": "numbers",
-					"class": "",
-					"style": ""
-				    }
-			},
-			"a":  {
-				set_attributes: {
-					target: "_blank",
-					rel:    "nofollow"
-				},
-				check_attributes: {
-					href:   "url" // important to avoid XSS
-				}
-			}
-		}
-	}});
+	$('.textarea').wysihtml5({ 
+	  imagesUrl: 'sample_images.json',
+	  imageUpload: function(el) {
+		var checkComplete, form;
+		form = $(el).find('.image-upload-form');
+		checkComplete = function() {
+		  var iframeContents, response, url;
+		  iframeContents = el.find('iframe').contents().find('body').text();
+		  if (iframeContents === "") {
+			return setTimeout(checkComplete, 2000);
+		  } else {
+			response = $.parseJSON(iframeContents);
+			url = response[0].url;
+			self.editor.composer.commands.exec("insertImage", url);
+			$('div.progress.upload').remove();
+			$('.bootstrap-wysihtml5-insert-image-modal').modal('hide');
+			return form.find('.progress').hide();
+		  }
+		};
+		return form.on('change', function() {
+		  form.attr('target', 'upload-iframe').attr('action', '/assets');
+		  form.find('.progress').show();
+		  form.submit();
+		  return checkComplete();
+		});
+	  }
+	});
 </script>
 
 <script type="text/javascript" charset="utf-8">

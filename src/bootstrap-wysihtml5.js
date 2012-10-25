@@ -1,43 +1,22 @@
 !function($, wysi) {
     "use strict";
-     (function(wysi) {
-          var undef;
-          wysi.commands.customSpan = {
-              exec: function(composer, command, sty) {
-                  return wysi.commands.formatInline.exec(composer, 'insertHTML', "span", sty, new RegExp(sty));
-              },
-              state: function(composer, command, sty) {
-                  return wysi.commands.formatInline.state(composer, 'insertHTML', "span", sty, new RegExp(sty));
-              },
-
-              value: function() {
-                  return undef;
-              }
-        };
-    })(wysi);
     var templates = function(key, locale) {
 
         var tpl = {
-            "font-styles": (function() {
-                var tmpl = "<li class='dropdown'>" +
-                    "<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>" +
-                    "<i class='icon-font'></i>&nbsp;<span class='current-font'>" + locale.font_styles.normal + "</span>&nbsp;<b class='caret'></b>" +
-                    "</a>" +
-                    "<ul class='dropdown-menu'>";
-                var stylesToRemove = locale.font_styles.remove || [];
-                $.each(['normal','h1','h2','h3'], function(idx, key) {
-                     if (stylesToRemove.indexOf(key) < 0) {
-                       tmpl += "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='" + key + "'>" + locale.font_styles[key] + "</a></li>";
-                     }
-                });
-                locale.font_styles.custom = locale.font_styles.custom || [];
-                $.each(locale.font_styles.custom, function(style, displayName) {
-                    tmpl += "<li><a data-wysihtml5-command='customSpan' data-wsyihtml5-command-value='" + style + "'>" + displayName + "</a></li>";
-                });
-                tmpl += "</ul>" +
-                "</li>";
-                return tmpl;
-            })(),
+            
+            "font-styles":
+                "<li class='dropdown'>" +
+                  "<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>" +
+                  "<i class='icon-font'></i>&nbsp;<span class='current-font'>" + locale.font_styles.normal + "</span>&nbsp;<b class='caret'></b>" +
+                  "</a>" +
+                  "<ul class='dropdown-menu'>" +
+                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='div'>" + locale.font_styles.normal + "</a></li>" +
+                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h1'>" + locale.font_styles.h1 + "</a></li>" +
+                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h2'>" + locale.font_styles.h2 + "</a></li>" +
+                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h3'>" + locale.font_styles.h3 + "</a></li>" +
+                  "</ul>" +
+                "</li>",
+
             "emphasis":
                 "<li>" +
                   "<div class='btn-group'>" +
@@ -80,42 +59,23 @@
                   "<div class='bootstrap-wysihtml5-insert-image-modal modal hide fade'>" +
                     "<div class='modal-header'>" +
                       "<a class='close' data-dismiss='modal'>&times;</a>" +
-                      //"<div class='input-append'><input value='' placeholder='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge span6' type='url'><span class='add-on'><a href='#' class='bootstrap-wysihtml5-modal-toggle' data-toggle='imageList'><i class='icon-black icon-th-list'></i></a><a href='#' class=' bootstrap-wysihtml5-modal-toggle' data-toggle='imageUpload'><i class='icon-black icon-upload'></i></a><a href='#' class='active bootstrap-wysihtml5-modal-toggle' data-toggle='imageOptions'><i class='icon-black icon-tasks'></i></a></span></div>" +
                       "<ul class='nav nav-tabs'>"+
                         "<li><a href='#images-insert' data-toggle='tab'>" + locale.image.insert + "</a></li>" +
-                        "<li><a href='#images-select' data-toggle='tab'>" + locale.image.select + "</a></li>" +
-                        "<li><a href='#images-upload' data-toggle='tab'>" + locale.image.upload + "</a></li>" +
                       "</ul>" +
                     "</div>" +
                     "<div class='modal-body'>" +
                       "<div class='tab-content'>" +
                           "<div class='tab-pane active' id='images-insert'>" +
-                            "<div class='control-row'><input value='' placeholder='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge span6' type='url'></div>" +
-                            "<div class='preview'></div>" +
-                            "<div class='control-row'><input placeholder='class' value='' class='bootstrap-wysihtml5-insert-image-class input-mini span6'></div>" +
-                            "<div class='control-row'><input placeholder='width' value='' class='bootstrap-wysihtml5-insert-image-width input-mini span2'> x " +
-                            "<input placeholder='height' value='' class='bootstrap-wysihtml5-insert-image-height input-mini span2'>" +
-                            "<input placeholder='alt' value='' class='bootstrap-wysihtml5-insert-image-alt input-mini span2'></div>" +
-                          "</div>" +
-                          "<div class='tab-pane imageList' id='images-select'>" +
-                            "<table class='table table-condensed table-bordered table-hover pointer'>" +
-                            "</table>" +
-                          "</div>" +
-                          "<div class='tab-pane' id='images-upload'>" +
-                            "<form action='"+ defaultOptions.imagesUrl +"' method='post' id='new_image' enctype='multipart/form-data'>" +
-                              "<input type='file' name='asset[asset]' />" +
-                              "<iframe class='hidden' id='upload-iframe' name='upload-iframe' src=''>" +
-                              "</iframe>"+
-                            "</form>" +
+                            "<input value='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge'>" +
+                            "<a href='#' class='btn btn-primary' data-dismiss='modal'>" + locale.image.insert + "</a>" +
                           "</div>" +
                       "</div>" +
                     "</div>" +
                     "<div class='modal-footer'>" +
                       "<a href='#' class='btn' data-dismiss='modal'>" + locale.image.cancel + "</a>" +
-                            "<a href='#' class='btn btn-primary' data-dismiss='modal'>" + locale.image.insert + "</a>" +
                     "</div>" +
                   "</div>" +
-                        "<a class='btn' data-wysihtml5-command='insertImage' title='" + locale.image.insert + "'><i class='icon-picture'></i></a>" +
+                  "<a class='btn' data-wysihtml5-command='insertImage' title='" + locale.image.insert + "'><i class='icon-picture'></i></a>" +
                 "</li>",
 
             "html":
@@ -143,7 +103,33 @@
                     "<li><div class='wysihtml5-colors' data-wysihtml5-command-value='blue'></div><a class='wysihtml5-colors-title' data-wysihtml5-command='foreColor' data-wysihtml5-command-value='blue'>" + locale.colours.blue + "</a></li>" +
                     "<li><div class='wysihtml5-colors' data-wysihtml5-command-value='orange'></div><a class='wysihtml5-colors-title' data-wysihtml5-command='foreColor' data-wysihtml5-command-value='orange'>" + locale.colours.orange + "</a></li>" +
                   "</ul>" +
-                "</li>"
+                "</li>",
+            "image-features": {
+                "list": {
+                    "tab": 
+                        "<li><a href='#images-select' data-toggle='tab'>" + locale.image.select + "</a></li>",
+                    "pane":
+                        "<div class='tab-pane' id='images-select'>" +
+                          "<table class='table table-condensed table-bordered table-hover pointer' id='images-list'>" +
+                          "</table>" +
+                        "</div>"
+                },
+                "upload": {
+                    "tab":
+                        "<li><a href='#images-upload' data-toggle='tab'>" + locale.image.upload + "</a></li>",
+                    "pane":
+                        "<div class='tab-pane' id='images-upload'>" +
+                          "<form action='' method='post' class='image-upload-form' enctype='multipart/form-data'>" +
+                            "<input type='file' name='asset[asset]' />" +
+                            "<iframe class='hidden' name='upload-iframe' src='' style='display:none;''>" +
+                            "</iframe>"+
+                            "<div class='progress progress-striped active' style='display:none;'><div class='bar' style='width: 100%;'></div></div>" +
+                          "</form>" +
+                        "</div>"
+                }
+
+            }
+
         };
         return tpl[key];
     };
@@ -154,13 +140,7 @@
 
     var Wysihtml5 = function(el, options) {
         this.el = el;
-        var toolbarOpts = options || defaultOptions
-        // add custom classes to the save class list */
-        for(var k in toolbarOpts.customStyles) {
-            toolbarOpts.parserRules.classes[k] = 1;
-        }
-        this.configuration = toolbarOpts;
-        this.toolbar = this.createToolbar(el, toolbarOpts);
+        this.toolbar = this.createToolbar(el, options || defaultOptions);
         this.editor =  this.createEditor(options);
 
         window.editor = this.editor;
@@ -202,15 +182,10 @@
 
 
             var culture = options.locale || defaultOptions.locale || "en";
+            var imageFeatureTemplates = templates('image-features', locale[culture])
             
-            locale[culture].font_styles.custom = options.customStyles;
-            locale[culture].font_styles.remove = options.removeStyles;
-            
-            for(var key in defaultOptions) {
 
-                if(key === 'imagesUrl') {
-                    this.getImages();
-                }
+            for(var key in defaultOptions) {
 
                 var value = false;
 
@@ -221,17 +196,20 @@
                 } else {
                     value = defaultOptions[key];
                 }
-                
-                if(key === 'imagesUrl' && typeof options[key] === 'string') {
-                    this.getImages(options[key]);
-                } else if (key === 'imagesUrl' && typeof value === 'boolean') {}
 
-                if(key === 'uploadInit' && typeof options[key] === 'function') {
-                    console.log('--------');
-console.log(options[key]);
-console.log(typeof options[key]);
-                    console.log('--------');
-                    options[key]();
+
+                if(key === 'imagesUrl' && typeof options[key] === 'string') {                
+                    toolbar.find('.nav.nav-tabs').append(imageFeatureTemplates.list.tab);
+                    toolbar.find('.tab-content').append(imageFeatureTemplates.list.pane);
+
+                    this.getImages(options[key]);
+                }
+
+                if (key === 'imageUpload') {
+                    toolbar.find('.nav.nav-tabs').append(imageFeatureTemplates.upload.tab);
+                    toolbar.find('.tab-content').append(imageFeatureTemplates.upload.pane);
+
+                    options[key](toolbar);
                 }
 
                 if(value === true) {
@@ -274,66 +252,17 @@ console.log(typeof options[key]);
             return toolbar;
         },
 
-        initImageUpload: function() {
+        getImages: function(imagesUrl) {
             var self = this;
-            var form = $('#new_image');
-            
-            var checkComplete = function(){
-                var iframeContents = window.frames['upload-iframe'].document.body.innerHTML
-                if (iframeContents == "") {
-                    setTimeout(checkComplete, 2000);
-                } else {
-                    var response = $.parseJSON(iframeContents);
-                    var url = response[0].url
-                    console.log(url)
-                    self.editor.composer.commands.exec("insertImage", url);
-                    $('div.progress.upload').remove();
-                    $('.bootstrap-wysihtml5-insert-image-modal').modal('hide');
-                }
-            }
-
-            form.on('change', function() {
-                form.attr('target','upload-iframe');
-                form.submit();
-                form.after('<div class="progress progress-striped active upload"><div class="bar" style="width: 100%;"></div></div>');
-                checkComplete();
-            });
-        },
-        
-        getImages: function(imageSrcUrl) {
-            console.info(this);
-            var self = this, items = [], widthHeight = '', thumb = '', del = '';
-            $.getJSON(imageSrcUrl, function(data) {
+            $.getJSON(imagesUrl, function(data) {
                 var items = [];
                 for (var key in data) {
                     if (data.hasOwnProperty(key)) {
-                        thumb = data[key].thumb_url ? '<img src="'+data[key].thumb_url+'" class="thmb">' : '';
-                        del = data[key].delete_url ? '<a href="'+data[key].delete_url+'" data-type="'+data[key].delete_type+'"><i class="icon-remove"></i>' : '';
-                        widthHeight = (data[key].widthHeight && parseInt(data[key].widthHeight.length) > 0) ? data[key].widthHeight.join(',') : '';
-                        items.push("<tr class='image-url pointer' data-image-url='" + data[key].url + "' data-image-dimensions='" + widthHeight + "'><td>" + thumb + " " + data[key].name + "</td><td class='actions'>" + del + "</td></tr>");
+                        items.push("<tr class='image-url pointer' data-image-url='" + data[key].url + "'><td>" + data[key].name + "</td></tr>");
                     }
                 }
-                $(".imageList table").html(items.join())
+                $("#images-list").html(items.join())
                 $('.image-url').on('click', function() {
-                    //var modal = $('.bootstrap-wysihtml5-insert-image-modal'), dim = [];
-                    //var url = $(this).data('image-url')
-                    //
-                    //modal.find('input.bootstrap-wysihtml5-insert-image-url').val(url)
-                    //
-                    //if ($(this).data('image-dimensions') !== '') {
-                    //    dim = $(this).data('image-dimensions').split(',')
-                    //    if (dim.length > 0) {
-                    //        modal.find('input.bootstrap-wysihtml5-insert-image-width').val(dim[0])
-                    //    } else {
-                    //        modal.find('input.bootstrap-wysihtml5-insert-image-width').val('')
-                    //    }
-                    //    
-                    //    if (dim.length > 1) {
-                    //        modal.find('input.bootstrap-wysihtml5-insert-image-height').val(dim[1])
-                    //    } else {
-                    //        modal.find('input.bootstrap-wysihtml5-insert-image-height').val('')
-                    //    }
-                    //}
                     var modal = $('.bootstrap-wysihtml5-insert-image-modal');
                     var url = $(this).data('image-url');
                     self.editor.composer.commands.exec("insertImage", url);
@@ -354,25 +283,13 @@ console.log(typeof options[key]);
             var self = this;
             var insertImageModal = toolbar.find('.bootstrap-wysihtml5-insert-image-modal');
             var urlInput = insertImageModal.find('.bootstrap-wysihtml5-insert-image-url');
-            var widthInput = insertImageModal.find('.bootstrap-wysihtml5-insert-image-width');
-            var heightInput = insertImageModal.find('.bootstrap-wysihtml5-insert-image-height');
-            var classInput = insertImageModal.find('.bootstrap-wysihtml5-insert-image-class');
             var insertButton = insertImageModal.find('a.btn-primary');
             var initialValue = urlInput.val();
 
             var insertImage = function() {
-                var url = urlInput.val(), width = widthInput.val(), height = heightInput.val(), classStr = classInput.val();
+                var url = urlInput.val();
                 urlInput.val(initialValue);
-                var httpHost = window.location.protocol + "//" + window.location.host
-                if (url[0] == '/') {
-                    url = httpHost + url
-                    console.log(url);
-                } else {
-                    console.log('url is not absolute');
-                    console.log(url[0]);
-                }
-                self.editor.currentView.element.focus();
-                self.editor.composer.commands.exec("insertImage", { 'src': url, 'width': width, 'height': height });
+                self.editor.composer.commands.exec("insertImage", url);
             };
 
             urlInput.keypress(function(e) {
@@ -386,9 +303,6 @@ console.log(typeof options[key]);
  
             insertImageModal.on('shown', function() {
                 urlInput.focus();
-
-                //This inits a couple times, but I'm not sure where it would go. Everywhere else seems to fire before the modal is created.
-                self.initImageUpload();
             });
 
             insertImageModal.on('hide', function() {
@@ -420,12 +334,7 @@ console.log(typeof options[key]);
 
             var insertLink = function() {
                 var url = urlInput.val();
-                var httpHost = window.location.protocol + "://" + window.location.host
-                if (url[0] == '/') {
-                    url = httpHost + url
-                }
                 urlInput.val(initialValue);
-                self.editor.currentView.element.focus();
                 self.editor.composer.commands.exec("createLink", {
                     href: url,
                     target: "_blank",
@@ -455,7 +364,7 @@ console.log(typeof options[key]);
                 var activeButton = $(this).hasClass("wysihtml5-command-active");
 
                 if (!activeButton) {
-                    insertLinkModal.appendTo('body').modal('show');
+                    insertLinkModal.append('body').modal('show');
                     insertLinkModal.on('click.dismiss.modal', '[data-dismiss="modal"]', function(e) {
                         e.stopPropagation();
                     });
@@ -503,8 +412,7 @@ console.log(typeof options[key]);
             return methods.init.apply( this, arguments );
         } else {
             $.error( 'Method ' +  method + ' does not exist on jQuery.wysihtml5' );
-        }
-        return false;
+        }    
     };
 
     $.fn.wysihtml5.Constructor = Wysihtml5;
@@ -517,13 +425,9 @@ console.log(typeof options[key]);
         "html": false,
         "link": true,
         "image": true,
-        //"imagesUrl": false,
-        //"uploadUrl": false,
-        //"uploadInit": function () {console.log('some upload initialized!');},
         "imagesUrl": '/assets.json',
+        "imageUpload": false,
         events: {},
-        customStyles: {},
-        removeStyles: [],
         parserRules: {
             classes: {
                 // (path_to_project/lib/css/wysiwyg-color.css)

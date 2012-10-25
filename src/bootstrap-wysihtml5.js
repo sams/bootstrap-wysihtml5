@@ -319,7 +319,7 @@
                 var activeButton = $(this).hasClass("wysihtml5-command-active");
 
                 if (!activeButton) {
-                    insertLinkModal.append('body').modal('show');
+                    insertLinkModal.modal('show');
                     insertLinkModal.on('click.dismiss.modal', '[data-dismiss="modal"]', function(e) {
                         e.stopPropagation();
                     });
@@ -356,7 +356,7 @@
         init: function(options) {
             var that = this;
             return methods.shallowExtend.apply(that, [options]);
-        },
+        }
 
     };
 
@@ -367,7 +367,8 @@
             return methods.init.apply( this, arguments );
         } else {
             $.error( 'Method ' +  method + ' does not exist on jQuery.wysihtml5' );
-        }    
+        }
+        return false;
     };
 
     $.fn.wysihtml5.Constructor = Wysihtml5;

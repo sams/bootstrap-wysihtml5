@@ -85,7 +85,33 @@
 <script src="src/bootstrap-wysihtml5.js"></script>
 
 <script>
-	$('.textarea').wysihtml5({ imagesUrl: 'sample_images.json'});
+	$('.textarea').wysihtml5({ 
+		imagesUrl: 'sample_images.json',
+		imageUpload: function(el) {
+      var checkComplete, form;
+      form = $(el).find('.image-upload-form');
+      checkComplete = function() {
+        var iframeContents, response, url;
+        iframeContents = el.find('iframe').contents().find('body').text();
+        if (iframeContents === "") {
+          return setTimeout(checkComplete, 2000);
+        } else {
+          response = $.parseJSON(iframeContents);
+          url = response[0].url;
+          self.editor.composer.commands.exec("insertImage", url);
+          $('div.progress.upload').remove();
+          $('.bootstrap-wysihtml5-insert-image-modal').modal('hide');
+          return form.find('.progress').hide();
+        }
+      };
+      return form.on('change', function() {
+        form.attr('target', 'upload-iframe').attr('action', '/assets');
+        form.find('.progress').show();
+        form.submit();
+        return checkComplete();
+      });
+    }
+	});
 </script>
 
 <script type="text/javascript" charset="utf-8">

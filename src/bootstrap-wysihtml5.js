@@ -16,7 +16,7 @@
         };
     })(wysi);
 
-        var tpl = {
+    var tpl = {
         
         "font-styles": function(locale) {
             var tmpl = "<li class='dropdown'>" +
@@ -95,8 +95,6 @@
                       "<a class='close' data-dismiss='modal'>&times;</a>" +
                       "<ul class='nav nav-tabs'>"+
                         "<li><a href='#images-insert' data-toggle='tab'>" + locale.image.insert + "</a></li>" +
-                        "<li><a href='#images-select' data-toggle='tab'>" + locale.image.select + "</a></li>" +
-                        "<li><a href='#images-upload' data-toggle='tab'>" + locale.image.upload + "</a></li>" +
                       "</ul>" +
                     "</div>" +
                     "<div class='modal-body'>" +
@@ -104,17 +102,6 @@
                           "<div class='tab-pane active' id='images-insert'>" +
                             "<input value='http://' class='bootstrap-wysihtml5-insert-image-url input-xlarge'>" +
                             "<a href='#' class='btn btn-primary' data-dismiss='modal'>" + locale.image.insert + "</a>" +
-                          "</div>" +
-                          "<div class='tab-pane' id='images-select'>" +
-                            "<table class='table table-condensed table-bordered table-hover pointer' id='images-list'>" +
-                            "</table>" +
-                          "</div>" +
-                          "<div class='tab-pane' id='images-upload'>" +
-                            "<form action='"+ defaultOptions.imagesUrl +"' method='post' id='new_image' enctype='multipart/form-data'>" +
-                              "<input type='file' name='asset[asset]' />" +
-                              "<iframe class='hidden' id='upload-iframe' name='upload-iframe' src=''>" +
-                              "</iframe>"+
-                            "</form>" +
                           "</div>" +
                       "</div>" +
                     "</div>" +
@@ -125,7 +112,34 @@
                   "<a class='btn btn-wysihtml5' data-wysihtml5-command='insertImage' title='" + locale.image.insert + "'><i class='icon-picture'></i></a>" +
                 "</li>";
         },
-
+        "image-features": function(locale) {
+            var feat = {
+                "list": {
+                    "tab": 
+                        "<li><a href='#images-select' data-toggle='tab'>" + locale.image.select + "</a></li>",
+                    "pane":
+                        "<div class='tab-pane' id='images-select'>" +
+                          "<table class='table table-condensed table-bordered table-hover pointer' id='images-list'>" +
+                          "</table>" +
+                        "</div>"
+                },
+                "upload": {
+                    "tab":
+                        "<li><a href='#images-upload' data-toggle='tab'>" + locale.image.upload + "</a></li>",
+                    "pane":
+                        "<div class='tab-pane' id='images-upload'>" +
+                          "<form action='' method='post' class='image-upload-form' enctype='multipart/form-data'>" +
+                            "<input type='file' name='asset[asset]' />" +
+                            "<iframe class='hidden' name='upload-iframe' src='' style='display:none;''>" +
+                            "</iframe>"+
+                            "<div class='progress progress-striped active' style='display:none;'><div class='bar' style='width: 100%;'></div></div>" +
+                          "</form>" +
+                        "</div>"
+                }
+            }, tmpl = '';
+                
+            return feat;
+        },
         "html": function(locale) {
             return "<li>" +
                   "<div class='btn-group'>" +
@@ -216,15 +230,12 @@
 
 
             var culture = options.locale || defaultOptions.locale || "en";
+            var imageFeatureTemplates = templates('image-features', locale[culture])
             
             locale[culture].font_styles.custom = options.customStyles;
             locale[culture].font_styles.remove = options.removeStyles;
             
             for(var key in defaultOptions) {
-
-                if(key === 'imagesUrl') {
-                    this.getImages();
-                }
 
                 var value = false;
 
@@ -234,6 +245,21 @@
                     }
                 } else {
                     value = defaultOptions[key];
+                }
+
+
+                if(key === 'imagesUrl' && typeof options[key] === 'string') {                
+                    toolbar.find('.nav.nav-tabs').append(imageFeatureTemplates.list.tab);
+                    toolbar.find('.tab-content').append(imageFeatureTemplates.list.pane);
+
+                    this.getImages(options[key]);
+                }
+
+                if (key === 'imageUpload') {
+                    toolbar.find('.nav.nav-tabs').append(imageFeatureTemplates.upload.tab);
+                    toolbar.find('.tab-content').append(imageFeatureTemplates.upload.pane);
+
+                    options[key](toolbar);
                 }
 
                 if(value === true) {
@@ -276,35 +302,9 @@
             return toolbar;
         },
 
-        initImageUpload: function() {
+        getImages: function(imagesUrl) {
             var self = this;
-            var form = $('#new_image');
-            
-            var checkComplete = function(){
-                var iframeContents = window.frames['upload-iframe'].document.body.innerHTML
-                if (iframeContents == "") {
-                    setTimeout(checkComplete, 2000);
-                } else {
-                    var response = $.parseJSON(iframeContents);
-                    var url = response[0].url
-                    console.log(url)
-                    self.editor.composer.commands.exec("insertImage", url);
-                    $('div.progress.upload').remove();
-                    $('.bootstrap-wysihtml5-insert-image-modal').modal('hide');
-                }
-            }
-
-            form.on('change', function() {
-                form.attr('target','upload-iframe');
-                form.submit();
-                form.after('<div class="progress progress-striped active upload"><div class="bar" style="width: 100%;"></div></div>');
-                checkComplete();
-            });
-        },
-
-        getImages: function() {
-            var self = this;
-            $.getJSON(defaultOptions.imagesUrl, function(data) {
+            $.getJSON(imagesUrl, function(data) {
                 var items = [];
                 for (var key in data) {
                     if (data.hasOwnProperty(key)) {
@@ -354,9 +354,6 @@
  
             insertImageModal.on('shown', function() {
                 urlInput.focus();
-
-                //This inits a couple times, but I'm not sure where it would go. Everywhere else seems to fire before the modal is created.
-                self.initImageUpload();
             });
 
             insertImageModal.on('hide', function() {
@@ -482,6 +479,7 @@
         "link": true,
         "image": true,
         "imagesUrl": '/assets.json',
+        "imageUpload": false,
         events: {},
         customStyles: {},
         removeStyles: [],

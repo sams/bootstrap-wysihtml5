@@ -16,7 +16,14 @@
                     "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h3'>" + locale.font_styles.h3 + "</a></li>" +
                   "</ul>" +
                 "</li>",
-
+            "multiple-font-styles":
+                "<li>" +
+                  "<div class='btn-group'>" +
+                    "<a class='btn' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h1' title=''>" + locale.multiple_font_styles.h1+ "</a>" +
+                    "<a class='btn' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h2' title=''>" + locale.multiple_font_styles.h2 + "</a>" +
+                    "<a class='btn' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h3' title=''>" + locale.multiple_font_styles.h3 + "</a>" +
+                  "</div>" +
+                "</li>",
             "emphasis":
                 "<li>" +
                   "<div class='btn-group'>" +
@@ -343,6 +350,7 @@
 
     var defaultOptions = $.fn.wysihtml5.defaultOptions = {
         "font-styles": true,
+        "multiple-font-styles": false,
         "color": false,
         "emphasis": true,
         "lists": true,
@@ -415,6 +423,11 @@
         en: {
             font_styles: {
                 normal: "Normal text",
+                h1: "Heading 1",
+                h2: "Heading 2",
+                h3: "Heading 3"
+            },
+            multiple_font_styles: {
                 h1: "Heading 1",
                 h2: "Heading 2",
                 h3: "Heading 3"

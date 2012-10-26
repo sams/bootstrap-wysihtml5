@@ -130,6 +130,17 @@ $('#some-textarea').wysihtml5({
 });
 </pre>
 
+h3. Images
+
+You can specify a URL of JSON to populate a list of images in the image input dialogue. It expects an array of objects with "name" and "url" attributes.
+
+<pre>
+  $('#some-textarea').wysihtml5({
+    "imagesUrl": 'http://mywebsite.com/images.json'
+  });
+</pre>
+
+
 h3. Shallow copy by default, deep on request
 
 Options you pass in will be added to the defaults via a shallow copy.  (see "jQuery.extend()":http://api.jquery.com/jQuery.extend/ for details). You can use a deep copy instead (which is probably what you want if you're adding tags or classes to parserRules) via 'deepExtend', as in the parserRules example below.

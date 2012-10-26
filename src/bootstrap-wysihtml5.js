@@ -1,19 +1,41 @@
 !function($, wysi) {
     "use strict";
+     (function(wysi) {
+          var undef;
+          wysi.commands.customSpan = {
+              exec: function(composer, command, sty) {
+                  return wysi.commands.formatInline.exec(composer, 'insertHTML', "span", sty, new RegExp(sty));
+              },
+              state: function(composer, command, sty) {
+                  return wysi.commands.formatInline.state(composer, 'insertHTML', "span", sty, new RegExp(sty));
+              },
 
-    var tpl = {
+              value: function() {
+                  return undef;
+              }
+        };
+    })(wysi);
+
+        var tpl = {
+        
         "font-styles": function(locale) {
-            return "<li class='dropdown'>" +
-                  "<a class='btn dropdown-toggle btn-wysihtml5' data-toggle='dropdown' href='#'>" +
-                  "<i class='icon-font'></i>&nbsp;<span class='current-font'>" + locale.font_styles.normal + "</span>&nbsp;<b class='caret'></b>" +
-                  "</a>" +
-                  "<ul class='dropdown-menu'>" +
-                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='div'>" + locale.font_styles.normal + "</a></li>" +
-                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h1'>" + locale.font_styles.h1 + "</a></li>" +
-                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h2'>" + locale.font_styles.h2 + "</a></li>" +
-                    "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h3'>" + locale.font_styles.h3 + "</a></li>" +
-                  "</ul>" +
-                "</li>";
+            var tmpl = "<li class='dropdown'>" +
+                "<a class='btn dropdown-toggle' data-toggle='dropdown' href='#'>" +
+                "<i class='icon-font'></i>&nbsp;<span class='current-font'>" + locale.font_styles.normal + "</span>&nbsp;<b class='caret'></b>" +
+                "</a>" +
+                "<ul class='dropdown-menu'>";
+            var stylesToRemove = locale.font_styles.remove || [];
+            $.each(['normal','h1','h2','h3'], function(idx, key) {
+                 if (stylesToRemove.indexOf(key) < 0) {
+                   tmpl += "<li><a data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='" + key + "'>" + locale.font_styles[key] + "</a></li>";
+                 }
+            });
+            locale.font_styles.custom = locale.font_styles.custom || [];
+            $.each(locale.font_styles.custom, function(style, displayName) {
+                tmpl += "<li><a data-wysihtml5-command='customSpan' data-wsyihtml5-command-value='" + style + "'>" + displayName + "</a></li>";
+            });
+            tmpl += "</ul>"
+            return tmpl;
         },
 
         "multiple-font-styles": function(locale) {
@@ -123,6 +145,10 @@
     var Wysihtml5 = function(el, options) {
         this.el = el;
         var toolbarOpts = options || defaultOptions;
+        // add custom classes to the save class list */
+        for(var k in toolbarOpts.customStyles) {
+            toolbarOpts.parserRules.classes[k] = 1;
+        }
         for(var t in toolbarOpts.customTemplates) {
           tpl[t] = toolbarOpts.customTemplates[t];
         }
@@ -165,6 +191,8 @@
                 'style': "display:none"
             });
             var culture = options.locale || defaultOptions.locale || "en";
+            locale[culture].font_styles.custom = options.customStyles;
+            locale[culture].font_styles.remove = options.removeStyles;
             for(var key in defaultOptions) {
                 var value = false;
 
@@ -372,6 +400,8 @@
         "link": true,
         "image": true,
         events: {},
+        customStyles: {},
+        removeStyles: [],
         parserRules: {
             classes: {
                 // (path_to_project/lib/css/wysiwyg-color.css)

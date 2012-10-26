@@ -19,9 +19,9 @@
             "multiple-font-styles":
                 "<li>" +
                   "<div class='btn-group'>" +
-                    "<a class='btn' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h1' title=''>" + locale.multiple_font_styles.h1+ "</a>" +
-                    "<a class='btn' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h2' title=''>" + locale.multiple_font_styles.h2 + "</a>" +
-                    "<a class='btn' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h3' title=''>" + locale.multiple_font_styles.h3 + "</a>" +
+                    "<a class='btn btn-wysihtml5' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h1' title=''>" + locale.multiple_font_styles.h1+ "</a>" +
+                    "<a class='btn btn-wysihtml5' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h2' title=''>" + locale.multiple_font_styles.h2 + "</a>" +
+                    "<a class='btn btn-wysihtml5' data-wysihtml5-command='formatBlock' data-wysihtml5-command-value='h3' title=''>" + locale.multiple_font_styles.h3 + "</a>" +
                   "</div>" +
                 "</li>",
             "emphasis":

@@ -86,7 +86,7 @@
 
 <script>
 	$('.textarea').wysihtml5({ 
-		imagesUrl: 'sample_images.json',
+		imagesUrl: 'images.php',
 		imageUpload: function(el) {
       var checkComplete, form;
       form = $(el).find('.image-upload-form');
@@ -105,7 +105,7 @@
         }
       };
       return form.on('change', function() {
-        form.attr('target', 'upload-iframe').attr('action', '/assets');
+        form.attr('target', 'upload-iframe').attr('action', 'upload.php');
         form.find('.progress').show();
         form.submit();
         return checkComplete();

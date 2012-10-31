@@ -4,7 +4,7 @@ date_default_timezone_set("America/Los_Angeles");
 
 $thumbnails = array("thumb" => array("size" => 200), "large" => array("size" => 800));
 define("PRODUCTION", preg_match('/alexkoppel\.com/', $_SERVER['SERVER_NAME']));
-define("IMAGE_URL_STEM", (PRODUCTION ? "http://images.alexkoppel.com/" : "http://10.0.1.7/~ahkoppel2/uploader/images/"));
+define("IMAGE_URL_STEM", $_SERVER['HTTP_HOST'] . str_replace(basename($_SERVER['PHP_SELF']), '', $_SERVER['PHP_SELF']));
 define("IMAGE_PATH", dirname(__FILE__) . "/images/");
 
 // max size: 4 MB
@@ -106,6 +106,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo json_encode(array("error" => $error));
         }
         else {
+            
+            /*
+            
+    {
+        "name": "HiRes.jpg",
+        "size": 1525252,
+        "url": "https://vocalem.s3.amazonaws.com/uploads/asset/asset/3/HiRes.jpg",
+        "delete_url": "/assets/3",
+        "delete_type": "DELETE"
+    }
+            */
             $results["error"] = false;
             echo json_encode($results);
         }
